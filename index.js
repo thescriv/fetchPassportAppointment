@@ -1,12 +1,16 @@
 const puppeteer = require('puppeteer')
 
+console.clear()
+
+let browser
+
 async function main() {
-    const browser = await puppeteer.launch({ headless: true });
+    browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     let foundAppointments = false
     let i = 0;
-    while (!foundAppointments) {
+    while (true) {
         await page.goto('https://teleservices.paris.fr/rdvtitres/jsp/site/Portal.jsp?page=appointmentsearch&view=search&category=titres');
 
         await page.waitForSelector('.container-fluid')
@@ -46,9 +50,18 @@ async function main() {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
         }
+
+        if (foundAppointments) {
+            await new Promise((resolve) => setTimeout(resolve, 5000) )
+            foundAppointments = false
+            console.clear()
+        }
     }
 
-    await browser.close();
+    
 }
+
+process.on('SIGTERM', async () => {await browser?.close();})
+process.on('SIGINT', async () => {await browser?.close();})
 
 main()
